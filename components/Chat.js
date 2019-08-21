@@ -6,7 +6,7 @@ import "firebase/firestore";
 class Chat extends React.Component {
   state = {
     messages: [
-      {
+      /*       {
         _id: 1,
         text: "Hello developer",
         createdAt: new Date(),
@@ -15,16 +15,44 @@ class Chat extends React.Component {
           name: "React Native",
           avatar: "https://placeimg.com/140/140/any"
         }
-      }
+      } */
     ]
   };
+
+  componentDidMount() {
+    this.unsubscribe = firebase
+      .firestore()
+      .collection("room-events")
+      .onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          this.onNewMessage(change.doc.data());
+          // if (change.type === "added") {
+          console.log("New city: ", change.doc.data());
+          //   }
+        });
+      });
+  }
+
+  onNewMessage(message) {
+    const messages = [message];
+
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, messages)
+    }));
+  }
+
+  componentWillUnmount() {
+    if (this.unsubscribe != null) {
+      this.unsubscribe();
+    }
+  }
 
   render() {
     return (
       <GiftedChat
         messages={this.state.messages}
-        onSend={message => {
-          this.sendMessage(message);
+        onSend={messages => {
+          this.sendMessage(messages[0]);
         }}
         user={{
           _id: 1
@@ -34,30 +62,12 @@ class Chat extends React.Component {
   }
 
   sendMessage(message) {
-    console.log(firebase);
+    // console.log(firebase);
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBg1td2gWXDdW2L6G0ofBdHYE29xdsRXB8",
-      authDomain: "wetech-88ea0.firebaseapp.com",
-      databaseURL: "https://wetech-88ea0.firebaseio.com",
-      projectId: "wetech-88ea0"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-
-    var db = firebase.firestore();
-    const hej = db.collection("room-events");
-
-    hej.add({
-      _id: 1,
-      text: message,
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: "React Native",
-        avatar: "https://placeimg.com/140/140/any"
-      }
-    });
+    firebase
+      .firestore()
+      .collection("room-events")
+      .add(message);
   }
 }
 
