@@ -20,17 +20,22 @@ class Chat extends React.Component {
   };
 
   componentDidMount() {
+    this.userId = Math.random();
+
     this.unsubscribe = firebase
       .firestore()
       .collection("room-events")
+      .orderBy("createdAt")
       .onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           this.onNewMessage(change.doc.data());
           // if (change.type === "added") {
-          console.log("New city: ", change.doc.data());
+          console.log("Incoming: ", change.doc.data());
           //   }
         });
       });
+
+    console.log(this.props.userName);
   }
 
   onNewMessage(message) {
@@ -55,14 +60,18 @@ class Chat extends React.Component {
           this.sendMessage(messages[0]);
         }}
         user={{
-          _id: 1
+          _id: this.userId,
+          name: this.props.userName
         }}
       />
     );
   }
 
   sendMessage(message) {
-    // console.log(firebase);
+    console.log("sending: ", message);
+
+    message.createdAt = message.createdAt.toJSON();
+    console.log("actually sending: ", message);
 
     firebase
       .firestore()

@@ -30,7 +30,7 @@ class Form extends React.Component {
             style={styles.btnText}
             onPress={() => {
               Actions.chat({
-                name: this.state.name
+                userName: this.state.name
               });
             }}
           />
